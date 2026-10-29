@@ -1,7 +1,7 @@
 import type { Task } from "@/lib/exercises";
 
 // Tarefas F9 (pacote s15; conteúdo do subagente).
-const TASKS_25_26_F9: Task[] = [] = [
+const TASKS_25_26_F9: Task[] = [
   {
     id: "t-25-selectivity",
     conceptId: 25,
