@@ -3,6 +3,7 @@ import type { Task } from "@/lib/exercises";
 // Tarefas de prática âncora de Resilience (PRD project2 D8 / pacote s3-exercicios).
 // Tarefas de Idempotency (F9, pacote s14; conteúdo do subagente).
 const TASKS_14_IDEMPOTENCY: Task[] = [
+  {
     id: "t-14-predict", conceptId: 14, type: "predict",
     prompt: "Predict the safe server response for each retry. Choose every statement supported by the stated policy.",
     context: "The provider committed payment P-901 for key K and fingerprint F, but the response was lost. The server retains key records for 24 hours, replays the stored outcome for the same fingerprint, and rejects a different fingerprint.",
@@ -207,7 +208,5 @@ export const TASKS_RESILIENCE: Task[] = [
       "Independent random samples spread retry times even when every client uses the same growing upper bounds.",
     ],
   },
-] = [
-  {
   ...TASKS_14_IDEMPOTENCY,
 ];
