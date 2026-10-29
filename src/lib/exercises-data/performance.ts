@@ -2,7 +2,7 @@ import type { Task } from "@/lib/exercises";
 
 // Tarefas de prática âncora de Performance (PRD project2 D8 / pacote s3-exercicios).
 // Tarefas F9 (pacote s16; conteúdo do subagente).
-const TASKS_93_F9: Task[] = [] = [
+const TASKS_93_F9: Task[] = [
   {
     id: "t-93-compare",
     conceptId: 93,
