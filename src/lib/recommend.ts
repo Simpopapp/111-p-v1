@@ -34,7 +34,7 @@ export interface Recommendation {
 }
 
 /** Percursos exemplares do planejamento §8.3, limitados ao que já tem aulas. */
-const ROUTES: { id: string; title: string; keywords: string[]; conceptIds: number[] }[] = [
+export const ROUTES: { id: string; title: string; keywords: string[]; conceptIds: number[] }[] = [
   {
     id: "request-lost",
     title: "The request didn't finish",

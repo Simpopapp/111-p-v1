@@ -31,6 +31,11 @@ export const PREREQ_MOTIVES: Record<string, string> = {
   "109:61": "O impacto e a recuperação do incidente são quantificados com métricas, não com impressões.",
   "109:63": "A verificação da mitigação consulta o orçamento de erro: sem SLO não há critério de término.",
   "111:109": "O postmortem herda a linha do tempo e a verificação construídas na resposta ao incidente.",
+  "14:11": "O timeout explica por que o cliente pode perder a resposta sem saber se a mutação remota foi commitada; sem essa distinção, a necessidade de identidade estável na repetição fica invisível.",
+  "14:12": "A política de retry decide quando a tentativa ambígua pode ser repetida; idempotência e retenção determinam se repetir a mutação preserva o efeito pretendido.",
+  "93:91": "A lição 91 estabelece latência como intervalo medido e pratica percentis por nearest-rank; essa base permite interpretar P99 sem confundir métrica, fronteira de medição e distribuição.",
+  "93:60": "Distributed Tracing dá meios de correlacionar requisições lentas a spans e dependências; P99 identifica um sintoma de cauda, mas não determina sua causa.",
+  "93:92": "Composition explica como o trabalho por requisição se combina entre operações e dependências; é necessário para investigar por que a cauda ponta a ponta pode refletir componentes e caminhos diferentes, sem supor que percentis se somam.",
 };
 
 export interface PrereqCard {

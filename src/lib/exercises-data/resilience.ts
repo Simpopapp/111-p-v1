@@ -1,6 +1,54 @@
 import type { Task } from "@/lib/exercises";
 
 // Tarefas de prática âncora de Resilience (PRD project2 D8 / pacote s3-exercicios).
+// Tarefas de Idempotency (F9, pacote s14; conteúdo do subagente).
+const TASKS_14_IDEMPOTENCY: Task[] = [
+  {
+    id: "t-14-predict", conceptId: 14, type: "predict",
+    prompt: "Predict the safe server response for each retry. Choose every statement supported by the stated policy.",
+    context: "The provider committed payment P-901 for key K and fingerprint F, but the response was lost. The server retains key records for 24 hours, replays the stored outcome for the same fingerprint, and rejects a different fingerprint.",
+    options: [
+      { key: "same", label: "K + F retried within 24 hours returns the stored outcome for P-901 without starting another charge." },
+      { key: "changed", label: "K reused with a changed amount is rejected as a fingerprint conflict." },
+      { key: "expired", label: "After the record expires, K is still guaranteed to identify P-901 forever." },
+      { key: "fresh", label: "A retry with a fresh key is equivalent to retrying K because the payload matches." },
+    ],
+    rubric: {
+      criteria: [
+        { key: "choice-same", label: "Same fingerprint replays outcome", cause: "Conflating a retry of one logical operation with a new payment can duplicate the external effect.", check: (a) => a.picked?.includes("same") === true },
+        { key: "choice-changed", label: "Changed fingerprint conflicts", cause: "Treating a reused key as a cache hit can hide changed user intent.", check: (a) => a.picked?.includes("changed") === true },
+        { key: "choice-expired", label: "Expiry removes the stated guarantee", cause: "Assuming permanent deduplication ignores the finite retention window.", check: (a) => a.picked?.includes("expired") === false },
+        { key: "choice-fresh", label: "Fresh key is a new operation identity", cause: "Equating matching payloads with matching operation identity can authorize another charge.", check: (a) => a.picked?.includes("fresh") === false },
+      ],
+      expected: "Select same and changed only. The same key and fingerprint within retention replay P-901; a different fingerprint conflicts. The contract says nothing protects a key after expiry, and a fresh key denotes a distinct operation even when its payload happens to match. After expiry, reconcile the payment before deciding whether to create a new operation.",
+      nextStep: "Trace who committed the side effect, what key/fingerprint the server retained, and whether that retention is still active.",
+    },
+    helpLevels: ["Focus on what the policy promises within its stated retention period.", "Compare operation identity (key), request identity (fingerprint), and the explicit expiry boundary.", "Same K + F replays P-901; K + changed fingerprint conflicts; expiry removes the guarantee; a fresh key may create a new charge."],
+  },
+  {
+    id: "t-14-choose-info", conceptId: 14, type: "choose-info",
+    prompt: "A checkout times out after sending a payment request. Before deciding whether to retry, choose the information and controls needed to avoid a duplicate charge.",
+    context: "The payment provider may have committed even though the client received no response. The current idempotency record might be close to expiry.",
+    options: [
+      { key: "identity", label: "The original operation key and canonical request fingerprint, including whether the retry payload is identical." },
+      { key: "outcome", label: "A provider/payment status lookup or reconciliation result for the original operation." },
+      { key: "retention", label: "The server/provider retention state and whether the original key is still covered." },
+      { key: "read-cache", label: "Whether the checkout page cached its last GET response; assume that proves no payment occurred." },
+    ],
+    rubric: {
+      criteria: [
+        { key: "choice-identity", label: "Preserve original operation identity", cause: "Using a new identity for an ambiguous retry can turn one intended payment into two.", check: (a) => a.picked?.includes("identity") === true },
+        { key: "choice-outcome", label: "Reconcile ambiguous provider outcome", cause: "A client timeout is not evidence that the remote mutation failed to commit.", check: (a) => a.picked?.includes("outcome") === true },
+        { key: "choice-retention", label: "Check the deduplication window", cause: "Retrying after the record expires assumes protection that the contract no longer provides.", check: (a) => a.picked?.includes("retention") === true },
+        { key: "choice-read-cache", label: "Do not infer mutation outcome from cached read", cause: "A possibly stale read cache cannot establish whether the payment provider committed.", check: (a) => a.picked?.includes("read-cache") === false },
+      ],
+      expected: "Select identity, outcome, and retention. Reuse the original key only with the original semantic payload, and establish whether the payment already exists and whether deduplication is still active. A cached GET is neither authoritative evidence of non-commit nor a guarantee about a mutation; reads may be repeated while their returned state changes. If retention has expired and outcome remains ambiguous, reconcile before creating a new operation.",
+      nextStep: "State the evidence that resolves remote outcome uncertainty before proposing a retry.",
+    },
+    helpLevels: ["Separate what the caller observed (timeout) from what the provider may have done.", "Look for operation identity, remote outcome evidence, and the time-bounded deduplication contract; a cached read is not proof of non-commit.", "Select identity, outcome, and retention. Reconcile the original operation; do not blindly send a fresh key after expiry."],
+  },
+];
+
 export const TASKS_RESILIENCE: Task[] = [
   {
     id: "t-10-predict",
@@ -160,4 +208,5 @@ export const TASKS_RESILIENCE: Task[] = [
       "Independent random samples spread retry times even when every client uses the same growing upper bounds.",
     ],
   },
+  ...TASKS_14_IDEMPOTENCY,
 ];
