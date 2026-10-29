@@ -31,6 +31,8 @@ export const PREREQ_MOTIVES: Record<string, string> = {
   "109:61": "O impacto e a recuperação do incidente são quantificados com métricas, não com impressões.",
   "109:63": "A verificação da mitigação consulta o orçamento de erro: sem SLO não há critério de término.",
   "111:109": "O postmortem herda a linha do tempo e a verificação construídas na resposta ao incidente.",
+  "14:11": "O timeout explica por que o cliente pode perder a resposta sem saber se a mutação remota foi commitada; sem essa distinção, a necessidade de identidade estável na repetição fica invisível.",
+  "14:12": "A política de retry decide quando a tentativa ambígua pode ser repetida; idempotência e retenção determinam se repetir a mutação preserva o efeito pretendido.",
 };
 
 export interface PrereqCard {
