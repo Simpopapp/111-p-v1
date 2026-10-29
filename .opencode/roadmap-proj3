@@ -99,16 +99,28 @@ E2E das telas tocadas · nenhum teste contratado enfraquecido.
 - [x] F8 concluída (gates acima verdes)
 
 ## F9 — Conteúdo: percursos fechados e honestidade (PRD §3/F9, contínuo)
-- [ ] Auditoria dos 111 conceitos pelos 8 critérios; elos frágeis primeiro
-- [ ] Percursos sem referência superficial no ponto decisivo
-- [ ] reviewed só com revisão efetiva
-- Gates F9: tsgo · vitest · build
-- [ ] F9 concluída (metas parciais registradas aqui)
+- [x] Auditoria dos 111 conceitos pelos 8 critérios; elos frágeis primeiro
+      (docs/planning/reports/remix3-f9-auditoria-111.md — a=26 b=85 c=0 no inventário;
+      10 elos frágeis priorizados; Security 78/79 sinalizada; subagente read-only s17)
+- [x] Percursos sem referência superficial no ponto decisivo
+      (lições 14, 25, 26, 93 rev 3.0 + 10 tarefas + motivos de pré-req; os 3 percursos
+      de ROUTES 100% com aula — contrato src/test/f9-audit.test.ts, falhava em 14/25/26/93 antes da integração)
+- [x] reviewed só com revisão efetiva
+      (guarda em f9-audit.test.ts: reviewed:true exige "revisão efetiva registrada";
+      30 lições com reviewed:false e proveniência honesta)
+- Gates F9: tsgo limpo · vitest 198/198 (+f9-audit: 2 contratos; nenhum teste
+  contratado enfraquecido) · build OK · verificação E2E nas 4 lições novas
+  (guided renderiza pré-reqs nomeados/situação/previsão; 0 pageerrors) ·
+  biblioteca exibe 30/111
+- [x] F9 concluída (metas parciais registradas: a expansão das 7 categorias sem
+      lição estruturada permanece aberta — fila priorizada no relatório de auditoria)
 
 ## Encerramento
-- Reporte ao monitor (seção 20 do plan.md) e registre "remix finalizado (+N)"
-  por grande objetivo concluído; linha "Próximo remix:" aponta a fase pendente.
-- Próximo remix: **F9 — Conteúdo: percursos fechados e honestidade** (auditoria
-  dos 111 conceitos pelos 8 critérios; elos frágeis primeiro; reviewed só com
-  revisão efetiva — F6 e F7 no remix anterior, F8 concluída neste remix —
-  stage-13).
+- Reporte ao monitor (seção 20 do plan.md) e registre "remix finalizado (+N)" por grande objetivo concluído; linha "Próximo remix:" aponta a fase pendente.
+- remix 3: F0–F8 concluídas em rodadas anteriores; F9 concluída nesta rodada
+  (remix finalizado (+1), docs/planning/reports/remix3-f9-conteudo.md e stage-14).
+- Próximo remix: **expansão contínua do F9 (§12.2)** — primeira lição por categoria
+  sem aula (DevOps, Streaming, Distributed, Scaling, Reliability, Security,
+  Networking), começando por Security 78/79 (SQL injection em sintoma e laboratório
+  sem aula); depois revisão de feedback/transfer das lições "a" dos elos 12, 13,
+  15, 16, 20 — fila completa em remix3-f9-auditoria-111.md.
