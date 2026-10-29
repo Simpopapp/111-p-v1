@@ -468,4 +468,127 @@ export const LESSONS_PERFORMANCE: Lesson[] = [
         "Canonical concept 44 in Performance. Rates are illustrative; S5 slow mode shows accumulation but does not implement upstream flow control or capacity benchmarking. Independent review is pending.",
     },
   },
+
+  // Lição 93 — P99 Latency (F9, pacote s16; conteúdo do subagente).
+  {
+  id: 93,
+  rev: "3.0",
+  objective:
+    "Interpret a P99 change from an explicitly defined request distribution and choose what evidence to collect before optimizing a tail.",
+  prereqIds: [91, 60, 92],
+  mentalModel: {
+    definition:
+      "P99 is a rank-based summary of a defined set of latency observations. With nearest-rank convention, sort N observations and select rank ceil(0.99 × N). It describes the observed distribution at a stated boundary and window; it does not identify a cause or guarantee future latency.",
+    analogy:
+      "Imagine arranging every checkout wait from shortest to longest and reading the wait at the 99th position out of 100.",
+    analogyLimits:
+      "Real traffic is not a fixed queue: request mix, concurrency, time windows, failures, and measurement boundaries change. A percentile rank is not a promise about the next request, and aggregating percentiles alone loses the underlying distribution.",
+    correspondence: [
+      ["One latency observation", "One measured checkout wait"],
+      ["Sorted sample", "Waits arranged shortest to longest"],
+      ["Nearest-rank P99", "Value at rank ceil(0.99 × N)"],
+    ],
+  },
+  scenario: {
+    system:
+      "A checkout service measures end-to-end request latency from gateway receipt to completed response, across a 10-minute window.",
+    data:
+      "In the baseline window there are 100 completed requests: ranks 1–95 are 100 ms, ranks 96–98 are 200 ms, and ranks 99–100 are 1000 ms. A later comparable window has 100 requests: 95 at 105 ms, three at 250 ms, and two at 2000 ms.",
+    symptom:
+      "The mean changes from 121 ms to 147.25 ms, while nearest-rank P99 rises from 1000 ms to 2000 ms; the tail worsens more sharply than the average suggests.",
+    constraints: [
+      "Use nearest-rank convention and state N, boundary, and window whenever reporting the percentile.",
+      "The histogram bins are exact-value groups for this teaching sample; coarse production buckets only bound a percentile unless finer data is available.",
+      "Completed requests exclude timeouts and failures unless those outcomes are represented separately; never silently treat them as fast or absent without disclosure.",
+      "Do not average per-instance or per-window P99 values as a substitute for merging weighted observations or compatible histograms.",
+    ],
+    baseline:
+      "Baseline: 95 × 100 + 3 × 200 + 2 × 1000 = 12,100 ms total, mean 121 ms; rank ceil(0.99 × 100) = 99 is 1000 ms. Later: 95 × 105 + 3 × 250 + 2 × 2000 = 14,725 ms, mean 147.25 ms; rank 99 is 2000 ms.",
+  },
+  representation: {
+    kind: "latency-histogram",
+    caption:
+      "Read the cumulative counts to locate rank 99; the second window doubles P99 although its mean rises by only about 21.7%.",
+    data: {
+      unit: "ms",
+      bins: [
+        { from: 100, to: 100, count: 95 },
+        { from: 200, to: 200, count: 3 },
+        { from: 1000, to: 1000, count: 2 },
+      ],
+      sample: [...Array(95).fill(100), ...Array(3).fill(200), ...Array(2).fill(1000)],
+      markers: [
+        { label: "P50", value: 100, convention: "nearest-rank" },
+        { label: "P99", value: 1000, convention: "nearest-rank" },
+      ],
+      scenario: { label: "Baseline mean", mean: 121 },
+      note:
+        "Exact repeated values are shown to make ranks auditable. Counts are 95 + 3 + 2 = 100; rank 99 lies in the 1000 ms group. Coarse buckets, small samples, censored failures, and incompatible windows limit inference.",
+    },
+    textEquivalent:
+      "100 observations: ranks 1–95 = 100 ms, 96–98 = 200 ms, 99–100 = 1000 ms. P50 is rank 50 = 100 ms; P99 is rank ceil(0.99 × 100) = 99 = 1000 ms. Mean = (95 × 100 + 3 × 200 + 2 × 1000) / 100 = 121 ms. The later sample has P99 2000 ms and mean 147.25 ms.",
+  },
+  worked: {
+    decision:
+      "Treat the P99 increase as a signal to investigate the affected tail, not as proof that a particular component is slow. Compare compatible distributions and traces before selecting an optimization.",
+    reasoning: [
+      "Fix the measurement boundary, population, time window, and percentile convention before comparing values.",
+      "For N = 100, nearest-rank P99 selects rank ceil(99) = 99, not the maximum by definition.",
+      "Cumulative counts put rank 99 in the final two observations: 1000 ms at baseline and 2000 ms later.",
+      "The mean rises 26.25 ms (about 21.7%), while P99 doubles; the mean alone understates the tail change.",
+      "Split or correlate by route, instance, dependency, and trace; inspect timeouts, errors, and traffic mix before attributing cause.",
+      "Do not average percentile summaries across servers or windows: use weighted underlying observations or a compatible mergeable distribution.",
+    ],
+  },
+  contrast: [
+    {
+      alternative: "Report only mean latency",
+      tradeoff:
+        "The mean is useful for total work and broad trends, but a small slow population can dominate user harm without moving it proportionally.",
+      whenNotToUse:
+        "Do not use the mean alone to judge a user-facing tail objective or to dismiss a sharp P99 regression.",
+    },
+    {
+      alternative: "Compare only the maximum",
+      tradeoff:
+        "The maximum surfaces the single most extreme observation but is highly sensitive to sample size and isolated anomalies; P99 summarizes a specified rank instead.",
+      whenNotToUse:
+        "Do not treat P99 as a replacement for failure counts, nor interpret it as a guarantee about every request.",
+    },
+  ],
+  misconceptions: [
+    {
+      wrong: "P99 always means the slowest request, or 99% of requests take exactly that long.",
+      discriminant:
+        "Ask for N, rank convention, sample boundary, and the number of observations above the selected rank.",
+      counterexample:
+        "For 100 observations with 99 at 100 ms and one at 10,000 ms, nearest-rank P99 is rank 99 = 100 ms; maximum is 10,000 ms. The extreme observation is not automatically P99.",
+    },
+    {
+      wrong: "Averaging instance P99 values or window P99 values gives the combined P99.",
+      discriminant:
+        "Check whether the underlying counts and weights are preserved; percentile summaries discard distribution detail.",
+      counterexample:
+        "Instance A serves 990 requests at 10 ms and B serves 10 at 1000 ms. A's P99 is 10 ms and B's is 1000 ms; their simple average is 505 ms, but the combined 1000-request nearest-rank P99 is rank 990 = 10 ms.",
+    },
+  ],
+  practiceIds: ["t-93-compare", "t-93-find-flaw"],
+  evidenceCriteria: [
+    "Calculate P99 under a named convention from a distribution whose count, boundary, and sample size are explicit.",
+    "Explain how P99 and mean can move by different proportions and identify why that changes investigation priority.",
+    "Reject a percentile computed only from successful requests when failures/timeouts are material, and request their separate counts or an explicit treatment.",
+    "Explain why averaging per-instance/window percentiles can conceal a tail and name a distribution-preserving aggregation approach.",
+    "Distinguish a tail signal from causal evidence and select trace or segmentation data to investigate next.",
+  ],
+  transfer: {
+    variant:
+      "For a document-rendering pipeline, compare two explicitly sampled submission-to-delivery windows. Include retries, timeouts, and unfinished jobs separately; use the changed P99 to prioritize trace investigation without assuming the renderer is the cause.",
+    domain: "Asynchronous document processing",
+  },
+  provenance: {
+    reviewed: false,
+    notes:
+      "New editorial proposal for canonical concept 93, informed by the existing latency lesson and canonical relationship to composition. Percentiles use nearest-rank examples with explicit instructional samples; examples are not service-level recommendations. Independent technical and editorial review is pending.",
+  },
+},
 ];

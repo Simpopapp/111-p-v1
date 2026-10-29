@@ -1,6 +1,80 @@
 import type { Task } from "@/lib/exercises";
 
 // Tarefas de prática âncora de Performance (PRD project2 D8 / pacote s3-exercicios).
+// Tarefas F9 (pacote s16; conteúdo do subagente).
+const TASKS_93_F9: Task[] = [] = [
+  {
+    id: "t-93-compare",
+    conceptId: 93,
+    type: "compare",
+    prompt:
+      "Compare the two checkout windows. Which conclusion best supports the next engineering decision? Choose one.",
+    context:
+      "Both windows contain 100 completed requests measured from gateway receipt to response completion, using nearest-rank percentiles. Window A: 95 at 100 ms, 3 at 200 ms, 2 at 1000 ms (mean 121 ms, P99 1000 ms). Window B: 95 at 105 ms, 3 at 250 ms, 2 at 2000 ms (mean 147.25 ms, P99 2000 ms). Failures and timeouts are reported separately and have not changed between windows.",
+    options: [
+      { key: "a", label: "The mean rose about 21.7% but P99 doubled; investigate the tail using traces and segmentation before attributing cause." },
+      { key: "b", label: "The mean rose only modestly, so the tail is effectively unchanged and no investigation is warranted." },
+      { key: "c", label: "The P99 doubling proves the database is the cause; optimize database queries immediately." },
+      { key: "d", label: "Average the two P99 values to decide the combined system's P99." },
+    ],
+    rubric: {
+      criteria: [
+        {
+          key: "tail-change-and-causality",
+          label: "Recognizes the disproportionate tail change without claiming a cause",
+          cause:
+            "The response either lets the mean conceal a doubled P99 or mistakes a percentile signal for causal evidence.",
+          check: (a) => a.picked?.length === 1 && a.picked[0] === "a",
+        },
+      ],
+      expected:
+        "P99 rises from 1000 to 2000 ms (2×), while mean rises from 121 to 147.25 ms (about 21.7%). This makes tail-focused investigation worthwhile, but the distribution alone cannot identify the responsible dependency. Compare traces, routes, instances, and workload before choosing a fix.",
+      nextStep:
+        "Choose a segmentation (route, instance, or dependency) and state what trace evidence would distinguish queueing from a slow downstream call.",
+    },
+    helpLevels: [
+      "Compare rank 99 in both sorted samples, separately from the arithmetic mean.",
+      "The mean changes by 26.25 ms; P99 changes from 1000 to 2000 ms. Ask whether that proves a specific cause.",
+      "Select the option that prioritizes investigation of the tail but requires traces/segmentation before naming a culprit.",
+    ],
+  },
+  {
+    id: "t-93-find-flaw",
+    conceptId: 93,
+    type: "find-flaw",
+    prompt:
+      "Identify the main flaw in this reliability report and choose the best correction.",
+    context:
+      "A service reports P99 = 80 ms from successful requests only. During the same window, 4% of requests timed out and were omitted. The dashboard then averages the P99 summaries of two unequal-volume instances to claim the fleet P99 is 80 ms. One instance handled 990 successful requests at 10 ms; the other handled 10 at 1000 ms.",
+    options: [
+      { key: "a", label: "The report is sound because P99 already includes timeouts and weighting." },
+      { key: "b", label: "Both selection and aggregation are flawed: disclose timeouts and population, then merge compatible weighted distributions or observations rather than averaging P99 summaries." },
+      { key: "c", label: "Use the maximum latency as the fleet P99; it always equals nearest-rank P99." },
+      { key: "d", label: "Average the instance P99 values after weighting each instance equally, regardless of request volume." },
+    ],
+    rubric: {
+      criteria: [
+        {
+          key: "population-and-aggregation",
+          label: "Detects successful-only selection and invalid averaging of percentile summaries",
+          cause:
+            "The response assumes omitted failures are represented in a successful-only sample, or assumes percentile summaries can be combined arithmetically without preserving request counts and distributions.",
+          check: (a) => a.picked?.length === 1 && a.picked[0] === "b",
+        },
+      ],
+      expected:
+        "A successful-only P99 is conditional on completing requests and hides the 4% timeouts; report their count/rate and define their treatment. The fleet calculation also cannot average instance P99s. With the stated 990 requests at 10 ms and 10 at 1000 ms, combined nearest-rank P99 at rank 990 is 10 ms, while the simple average of instance P99s (10 and 1000 ms) is 505 ms. Preserve weights and distribution using merged observations or compatible histogram/sketch data; disclose approximation and window alignment.",
+      nextStep:
+        "Rewrite the report header with population, window, boundary, convention, failures, and aggregation method before using it for a decision.",
+    },
+    helpLevels: [
+      "Ask which requests are absent from the successful-only sample and whether the two instances handled equal volume.",
+      "A percentile summarizes its input population; omitted timeouts cannot affect its rank. Percentile summaries also do not retain all counts/distribution detail.",
+      "Choose the correction that reports failures and combines weighted underlying distributions, not per-instance P99 numbers.",
+    ],
+  },
+];
+
 export const TASKS_PERFORMANCE: Task[] = [
   {
     id: "t-2-predict",
@@ -145,4 +219,5 @@ export const TASKS_PERFORMANCE: Task[] = [
       "Check whether rank 990 falls inside the final block of 20 slow requests, and weight both groups when calculating the mean.",
     ],
   },
+  ...TASKS_93_F9,
 ];
