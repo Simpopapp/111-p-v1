@@ -493,7 +493,7 @@ export const LESSONS_DATABASE: Lesson[] = [
         "An import that inserts many products must also maintain every relevant index entry, increasing work compared with a table that has fewer indexes.",
     },
   ],
-  practiceIds: ["t-25-selectivity", "t-25-write-cost"],
+  practiceIds: ["t-25-compare", "t-25-find-flaw"],
   evidenceCriteria: [
     "Describe how an index can reduce candidate row lookup and why this is conditional on query shape and data distribution.",
     "Distinguish result rows from rows examined and explain why low selectivity can make a scan preferable.",
@@ -709,7 +709,7 @@ export const LESSONS_DATABASE: Lesson[] = [
         "A subquery used to express an existence condition may have a plan as good as, or better than, a handwritten join; an uncareful join rewrite can duplicate outer rows.",
     },
   ],
-  practiceIds: ["t-26-projection", "t-26-seq-scan"],
+  practiceIds: ["t-26-choose-info", "t-26-find-flaw"],
   evidenceCriteria: [
     "Distinguish the number of application queries from the cost of each query.",
     "Explain why requesting unused large columns can be avoidable work without claiming a guaranteed physical-I/O reduction.",

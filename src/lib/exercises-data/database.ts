@@ -3,7 +3,7 @@ import type { Task } from "@/lib/exercises";
 // Tarefas F9 (pacote s15; conteúdo do subagente).
 const TASKS_25_26_F9: Task[] = [
   {
-    id: "t-25-selectivity",
+    id: "t-25-compare",
     conceptId: 25,
     type: "compare",
     prompt:
@@ -61,7 +61,7 @@ const TASKS_25_26_F9: Task[] = [
     ],
   },
   {
-    id: "t-25-write-cost",
+    id: "t-25-find-flaw",
     conceptId: 25,
     type: "find-flaw",
     prompt:
@@ -119,7 +119,7 @@ const TASKS_25_26_F9: Task[] = [
     ],
   },
   {
-    id: "t-26-projection",
+    id: "t-26-choose-info",
     conceptId: 26,
     type: "choose-info",
     prompt:
@@ -177,7 +177,7 @@ const TASKS_25_26_F9: Task[] = [
     ],
   },
   {
-    id: "t-26-seq-scan",
+    id: "t-26-find-flaw",
     conceptId: 26,
     type: "find-flaw",
     prompt:
